@@ -1,25 +1,26 @@
-# Use an official Dart image
-FROM dart:stable
+# Use the official Flutter image
+FROM cirrusci/flutter:stable-web AS builder
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
 
-# Copy pubspec and get dependencies
-COPY pubspec.* ./
-RUN dart pub get
-
-# Copy application files
+# Copy the project files
 COPY . .
 
-# Build the Flutter web app
+# Get dependencies
+RUN flutter pub get
+
+# Build the web app
 RUN flutter build web
 
-# Serve the app using a web server
+# Use a lightweight web server to serve the app
 FROM nginx:alpine
-COPY --from=0 /app/build/web /usr/share/nginx/html
 
-# Expose port 80
+# Copy the built app to Nginx's html directory
+COPY --from=builder /app/build/web /usr/share/nginx/html
+
+# Expose the port
 EXPOSE 80
 
-# Start NGINX
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
