@@ -6,6 +6,10 @@ LABEL description="A docker image made from jenkins lts and flutter installed"
 # Switching to root user to install dependencies and flutter
 USER root
 
+# Set environment variables
+ENV FLUTTER_HOME=/opt/flutter
+ENV PATH="$PATH:$FLUTTER_HOME/bin"
+
 # Install dependencies for Flutter
 RUN apt-get update && apt-get install -y \
     curl \
