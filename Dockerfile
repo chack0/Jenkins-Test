@@ -19,8 +19,11 @@ RUN apt-get update && apt-get install -y \
     bash \
     && rm -rf /var/lib/apt/lists/*
 
-# Cleaning dependencies and installing flutter from the root user.
+# install Docker.
+RUN apt-get update && \
+    apt-get install -y docker.io
 
+# Cleaning dependencies and installing flutter from the root user.
 RUN  apt-get clean \
     && git clone https://github.com/flutter/flutter.git -b stable /usr/local/flutter \
     && chown -R jenkins:jenkins /usr/local/flutter
