@@ -6,9 +6,9 @@ LABEL description="A docker image made from jenkins lts and flutter installed"
 # Switching to root user to install dependencies and flutter
 USER root
 
-# # Set environment variables
-# ENV FLUTTER_HOME=/opt/flutter
-# ENV PATH="$PATH:$FLUTTER_HOME/bin"
+# Set environment variables
+ENV FLUTTER_HOME=/opt/flutter
+ENV PATH="$PATH:$FLUTTER_HOME/bin"
 
 # Install dependencies for Flutter
 RUN apt-get update && apt-get install -y \
@@ -30,9 +30,6 @@ RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz
   && mv docker/docker /usr/local/bin \
   && rm -r docker docker-17.04.0-ce.tgz    
 
-# # install Docker.
-# RUN apt-get update && \
-#     apt-get install -y docker.io
 
 # Switching to jenkins user - a good practice
 USER jenkins
