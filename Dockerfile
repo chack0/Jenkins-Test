@@ -30,6 +30,10 @@ RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz
   && mv docker/docker /usr/local/bin \
   && rm -r docker docker-17.04.0-ce.tgz    
 
+# InstallDocker and give jenkins docker rights
+RUN apt-get update && apt-get install -y docker.io && \
+    groupadd docker && \
+    usermod -aG docker jenkins
 
 # Switching to jenkins user - a good practice
 USER jenkins
@@ -41,17 +45,28 @@ RUN /usr/local/flutter/bin/flutter doctor -v \
 # Setting flutter and dart-sdk to PATH so they are accessible from terminal
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
-# # Use an Nginx image as a base
-# FROM nginx:alpine
 
-# # Remove the default Nginx website
-# RUN rm -rf /usr/share/nginx/html/*
+#//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-# # Copy the Flutter web build output to Nginx's html folder
-# COPY build/web /usr/share/nginx/html
-
-# # Expose port 80 for the web server
-# EXPOSE 80
-
-# # Start Nginx server
-# CMD ["nginx", "-g", "daemon off;"]
+#Stage 1 - Install dependencies and build the app in a build environment
+# FROM debian:latest AS build-env
+# # Install flutter dependencies
+# RUN apt-get update
+# RUN apt-get install -y curl git wget unzip libgconf-2-4 gdb libstdc++6 libglu1-mesa fonts-droid-fallback lib32stdc++6 python3 sed
+# RUN apt-get clean
+# # Clone the flutter repo
+# RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
+# # Set flutter path
+# ENV PATH="${PATH}:/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin"
+# # Run flutter doctor
+# RUN flutter doctor -v
+# RUN flutter channel master
+# RUN flutter upgrade
+# # Copy files to container and build
+# RUN mkdir /app/
+# COPY . /app/
+# WORKDIR /app/
+# RUN flutter build web
+# # Stage 2 - Create the run-time image
+# FROM nginx:1.21.1-alpine
+# COPY --from=build-env /app/build/web /usr/share/nginx/html
